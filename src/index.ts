@@ -1,10 +1,12 @@
 import { AppDataSource } from "./data-source";
+import { Profile } from "./entity/profile";
 import { User } from "./entity/User";
 import { Xxx } from "./entity/Xxx";
 import { MoreThan } from "typeorm";
 
 const XxxRepository = AppDataSource.getRepository(Xxx);
 const UserRepository = AppDataSource.getRepository(User);
+const ProfileRepository = AppDataSource.getRepository(Profile);
 
 AppDataSource.initialize()
   .then(async () => {
@@ -46,10 +48,14 @@ AppDataSource.initialize()
       "Anderson",
     ];
 
-    // const user = new User();
-    // user.firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    // user.lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    // user.age = Math.floor(Math.random() * 100);
+    const user = new User();
+    user.firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    user.lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    user.age = Math.floor(Math.random() * 100);
+
+    const profile = new Profile();
+    profile.description = "Profile description";
+    user.profile = profile;
 
     // await UserRepository.save([user, user, user]);
     // await UserRepository.save(user);
@@ -76,13 +82,28 @@ AppDataSource.initialize()
     //   .where("user.id IN (:...ids)", { ids: [4, 5] })
     //   .getMany();
 
-    await AppDataSource.transaction(async (transactionalEntityManager) => {
-      await transactionalEntityManager.save(User, {
-        firstName: "ahihi",
-        lastName: "bhihi",
-        age: 30,
-      });
+    // await AppDataSource.transaction(async (transactionalEntityManager) => {
+    //   await transactionalEntityManager.save(User, {
+    //     firstName: "ahihi",
+    //     lastName: "bhihi",
+    //     age: 30,
+    //   });
+    // });
+
+    const userFindOne = await UserRepository.findOne({
+      where: {
+        id: 999,
+      },
+      relations: ["profile"],
     });
+
+    // console.log("userFindOne", userFindOne);
+
+    // userFindOne.profile.description = "Updated profile description 111";
+
+    // await UserRepository.save(userFindOne);
+
+    await UserRepository.remove(userFindOne);
 
     const users = await UserRepository.find({
       where: {
