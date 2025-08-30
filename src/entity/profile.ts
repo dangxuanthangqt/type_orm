@@ -15,7 +15,9 @@ export class Profile {
   @Column()
   description: string;
 
-  @OneToOne(() => User, (user) => user.profile)
+  @OneToOne(() => User, {
+    cascade: true,
+  })
   @JoinColumn()
   user: User;
 }

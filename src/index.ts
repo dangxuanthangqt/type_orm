@@ -1,4 +1,5 @@
 import { AppDataSource } from "./data-source";
+import { Feed } from "./entity/feed";
 import { Profile } from "./entity/profile";
 import { User } from "./entity/User";
 import { Xxx } from "./entity/Xxx";
@@ -7,6 +8,7 @@ import { MoreThan } from "typeorm";
 const XxxRepository = AppDataSource.getRepository(Xxx);
 const UserRepository = AppDataSource.getRepository(User);
 const ProfileRepository = AppDataSource.getRepository(Profile);
+const FeedRepository = AppDataSource.getRepository(Feed);
 
 AppDataSource.initialize()
   .then(async () => {
@@ -53,12 +55,31 @@ AppDataSource.initialize()
     user.lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
     user.age = Math.floor(Math.random() * 100);
 
-    const profile = new Profile();
-    profile.description = "Profile description";
-    user.profile = profile;
+    // const profile = new Profile();
+    // profile.description = "Profile description";
+    // user.profile = profile;
 
     // await UserRepository.save([user, user, user]);
     // await UserRepository.save(user);
+
+    // const userCreated = UserRepository.create({
+    //   firstName: user.firstName,
+    //   lastName: user.lastName,
+    //   age: user.age,
+    //   profile: {
+    //     description: profile.description,
+    //   },
+    // });
+
+    // await UserRepository.save(userCreated);
+
+    // const profileCreated = ProfileRepository.create({
+    //   description: profile.description,
+    //   user: user,
+    // });
+
+    // await ProfileRepository.save(profileCreated);
+
     // console.log("Saved a new user with id: " + user.id);
 
     // const xxx = new Xxx();
@@ -90,12 +111,12 @@ AppDataSource.initialize()
     //   });
     // });
 
-    const userFindOne = await UserRepository.findOne({
-      where: {
-        id: 999,
-      },
-      relations: ["profile"],
-    });
+    // const userFindOne = await UserRepository.findOne({
+    //   where: {
+    //     id: 999,
+    //   },
+    //   relations: ["profile"],
+    // });
 
     // console.log("userFindOne", userFindOne);
 
@@ -103,14 +124,53 @@ AppDataSource.initialize()
 
     // await UserRepository.save(userFindOne);
 
-    await UserRepository.remove(userFindOne);
+    // await UserRepository.remove(userFindOne);
+
+    // const users = await UserRepository.find({
+    //   where: {
+    //     age: MoreThan(20),
+    //   },
+    //   relations: ["profile"],
+    // });
+
+    // console.log("Loaded users: ", users);
+
+    // const profiles = await ProfileRepository.find({
+    //   relations: ["user"],
+    // });
+
+    // console.log("profiles", profiles);
+
+    // ------------------------------------- ONE TO MANY
+
+    const feed1 = new Feed();
+    feed1.content = "Feed content 1";
+
+    const feed2 = new Feed();
+    feed2.content = "Feed content 2";
+
+    const feed3 = new Feed();
+    feed3.content = "Feed content 3";
+
+    user.feeds = [feed1, feed2, feed3];
+
+    // await UserRepository.save(user);
+
+    const feeds = await FeedRepository.find({
+      where: {
+        user: user,
+      },
+      relations: ["user"],
+    });
+
+    console.log("feeds", feeds);
 
     const users = await UserRepository.find({
-      where: {
-        age: MoreThan(20),
+      relations: {
+        feeds: true,
       },
     });
 
-    console.log("Loaded users: ", users);
+    console.log("userFindOne", users);
   })
   .catch((error) => console.log(error));
