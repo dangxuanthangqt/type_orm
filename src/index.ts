@@ -1,14 +1,19 @@
 import { AppDataSource } from "./data-source";
 import { Feed } from "./entity/feed";
+import { Post } from "./entity/post";
 import { Profile } from "./entity/profile";
+import { Tag } from "./entity/tag";
 import { User } from "./entity/User";
 import { Xxx } from "./entity/Xxx";
-import { MoreThan } from "typeorm";
+import { MoreThan, Repository } from "typeorm";
 
 const XxxRepository = AppDataSource.getRepository(Xxx);
 const UserRepository = AppDataSource.getRepository(User);
 const ProfileRepository = AppDataSource.getRepository(Profile);
 const FeedRepository = AppDataSource.getRepository(Feed);
+
+const PostRepository = AppDataSource.getRepository(Post);
+const TagRepository = AppDataSource.getRepository(Tag);
 
 AppDataSource.initialize()
   .then(async () => {
@@ -143,34 +148,76 @@ AppDataSource.initialize()
 
     // ------------------------------------- ONE TO MANY
 
-    const feed1 = new Feed();
-    feed1.content = "Feed content 1";
+    // const feed1 = new Feed();
+    // feed1.content = "Feed content 1";
 
-    const feed2 = new Feed();
-    feed2.content = "Feed content 2";
+    // const feed2 = new Feed();
+    // feed2.content = "Feed content 2";
 
-    const feed3 = new Feed();
-    feed3.content = "Feed content 3";
+    // const feed3 = new Feed();
+    // feed3.content = "Feed content 3";
 
-    user.feeds = [feed1, feed2, feed3];
+    // user.feeds = [feed1, feed2, feed3];
 
-    // await UserRepository.save(user);
+    // // await UserRepository.save(user);
 
-    const feeds = await FeedRepository.find({
-      where: {
-        user: user,
-      },
-      relations: ["user"],
-    });
+    // const feeds = await FeedRepository.find({
+    //   where: {
+    //     user: user,
+    //   },
+    //   relations: ["user"],
+    // });
 
-    console.log("feeds", feeds);
+    // console.log("feeds", feeds);
 
-    const users = await UserRepository.find({
-      relations: {
-        feeds: true,
-      },
-    });
+    // const users = await UserRepository.find({
+    //   relations: {
+    //     feeds: true,
+    //   },
+    // });
 
-    console.log("userFindOne", users);
+    // console.log("userFindOne", users);
+
+    //------------------------------------- MANY TO MANY
+
+    const post1 = new Post();
+    post1.title = "Post 11123";
+
+    const post2 = new Post();
+    post2.title = "Post 2";
+
+    const tag1 = new Tag();
+    tag1.name = "Tag 1";
+
+    const tag2 = new Tag();
+    tag2.name = "Tag 2";
+
+    post1.tags = [tag1, tag2];
+
+    await PostRepository.save(post1);
+
+    // await TagRepository.save(tag1);
+
+    const tags = await TagRepository.createQueryBuilder("tag")
+      .select(["tag.name", "post.id", "post.title"]) // cần include post.id
+      .leftJoinAndSelect("tag.posts", "post")
+      .getMany();
+
+    // const tags = await TagRepository.find({
+    //   relations: {
+    //     posts: true,
+    //   },
+    // });
+
+    // const tag = await TagRepository.findOne({
+    //   where: { id: 3 },
+    //   relations: ["posts"],
+    // });
+    // await TagRepository.remove(tag);
+
+    console.log(
+      "tags",
+      tags.map((tag) => ({ ...tag, posts: tag.posts.map((p) => p.title) }))
+    );
   })
   .catch((error) => console.log(error));

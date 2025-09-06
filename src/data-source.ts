@@ -4,6 +4,8 @@ import { User } from "./entity/User";
 import { Xxx } from "./entity/Xxx";
 import { Profile } from "./entity/profile";
 import { Feed } from "./entity/feed";
+import { Post } from "./entity/post";
+import { Tag } from "./entity/tag";
 
 export const AppDataSource = new DataSource({
   type: "mysql",
@@ -14,7 +16,7 @@ export const AppDataSource = new DataSource({
   database: "test",
   synchronize: true,
   logging: true,
-  entities: [User, Xxx, Profile, Feed],
+  entities: [User, Xxx, Profile, Feed, Post, Tag],
   migrations: [],
   subscribers: [],
 });
